@@ -16,17 +16,17 @@ namespace RestauranteNascimento.Repository
 
         public IEnumerable<Categoria> GetCategorias()
         {
-           return _context.Categorias.ToList();
+            return _context.Categorias.AsNoTracking().ToList();
         }
 
         public IEnumerable<Categoria> GetCategoriasComProdutos()
         {
-            return _context.Categorias.Include(c => c.Produtos).ToList();
+            return _context.Categorias.AsNoTracking().Include(c => c.Produtos).ToList();
         }
 
         public Categoria GetCategoriaById(int id)
         {
-            return _context.Categorias.Find(id);
+            return _context.Categorias.AsNoTracking().FirstOrDefault(c => c.Id == id);
         }
 
         public void PostCategoria(Categoria categoria)

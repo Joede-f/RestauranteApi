@@ -4,6 +4,7 @@ using RestauranteNascimento.Data.Context;
 using RestauranteNascimento.Profiles;
 using RestauranteNascimento.Repository;
 using RestauranteNascimento.Repository.interfaces;
+using RestauranteNascimento.Services;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,6 +30,9 @@ builder.Services.AddSingleton(mapper);
 
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
+
+builder.Services.AddScoped<CategoriaService, CategoriaService>();
+builder.Services.AddScoped<ProdutoService, ProdutoService>();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);

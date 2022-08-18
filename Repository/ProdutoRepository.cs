@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using RestauranteNascimento.Data.Context;
 using RestauranteNascimento.Models;
 using RestauranteNascimento.Repository.interfaces;
@@ -7,23 +8,21 @@ namespace RestauranteNascimento.Repository
 {
     public class ProdutoRepository : IProdutoRepository
     {
-        private readonly IMapper _mapper;
         private readonly AppDbContext _context;
 
-        public ProdutoRepository(IMapper mapper, AppDbContext context)
+        public ProdutoRepository(AppDbContext context)
         {
-            _mapper = mapper;
             _context = context;
         }
 
         public IEnumerable<Produto> GetProdutos()
         {
-            return _context.Produtos.ToList();
+            return _context.Produtos.AsNoTracking().ToList();
         }
 
         public Produto GetProdutoById(int id)
         {
-            return _context.Produtos.Find(id);
+            return _context.Produtos.AsNoTracking().FirstOrDefault(p => p.Id == id);
         }
 
         public void PostProduto(Produto produto)
