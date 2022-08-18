@@ -1,4 +1,5 @@
-﻿using RestauranteNascimento.Data.Context;
+﻿using Microsoft.EntityFrameworkCore;
+using RestauranteNascimento.Data.Context;
 using RestauranteNascimento.Models;
 using RestauranteNascimento.Repository.interfaces;
 
@@ -16,6 +17,11 @@ namespace RestauranteNascimento.Repository
         public IEnumerable<Categoria> GetCategorias()
         {
            return _context.Categorias.ToList();
+        }
+
+        public IEnumerable<Categoria> GetCategoriasComProdutos()
+        {
+            return _context.Categorias.Include(c => c.Produtos).ToList();
         }
 
         public Categoria GetCategoriaById(int id)

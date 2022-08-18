@@ -16,7 +16,7 @@ namespace RestauranteNascimento.Controllers
         private readonly IMapper _mapper;
         private ICategoriaRepository _catRespository;
 
-        public CategoriaController(AppDbContext context, IMapper mapper, ICategoriaRepository catRespository)
+        public CategoriaController(IMapper mapper, ICategoriaRepository catRespository)
         {
             _mapper = mapper;
             _catRespository = catRespository;
@@ -29,6 +29,13 @@ namespace RestauranteNascimento.Controllers
             IEnumerable<Categoria> categoria = _catRespository.GetCategorias();
             IEnumerable<ReadCategoriaDto> catDto = _mapper.Map<IEnumerable<ReadCategoriaDto>>(categoria);
             return Ok(catDto);
+        }
+
+        [HttpGet("produtos")]
+        public ActionResult<IEnumerable<ReadCategoriaDto>> ListaCategoriasComProdutos()
+        {
+            return Ok(_catRespository.GetCategoriasComProdutos());
+            
         }
 
 

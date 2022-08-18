@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using RestauranteNascimento.Data.Context;
 using RestauranteNascimento.Data.Dtos.ProdutoDtos;
 using RestauranteNascimento.Models;
+using RestauranteNascimento.Repository.interfaces;
 
 namespace RestauranteNascimento.Controllers
 {
@@ -11,20 +12,20 @@ namespace RestauranteNascimento.Controllers
     [ApiController]
     public class ProdutoController : ControllerBase
     {
-        private readonly AppDbContext _context;
         private readonly IMapper _mapper;
+        private readonly IProdutoRepository _prodRepository;
 
 
-        public ProdutoController(AppDbContext context, IMapper mapper)
+        public ProdutoController(IMapper mapper, IProdutoRepository prodRepository)
         {
-            _context = context;
             _mapper = mapper;
+            _prodRepository = prodRepository;
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<ReadProdutoDto>> ListarProdutos()
         {
-            IEnumerable<Produto> prod = _context.Produtos.ToList();
+            IEnumerable<Produto> prod = _prodRepository.GetProdutos();
             IEnumerable<ReadProdutoDto> readDto = _mapper.Map<IEnumerable<ReadProdutoDto>>(prod);
             return Ok(readDto);
         }
@@ -35,7 +36,7 @@ namespace RestauranteNascimento.Controllers
             if(id < 1) throw new ArgumentException("Id tem que ser maior do que zero");
 
 
-            Produto prod = _context.Produtos.Find(id);
+            Produto prod = _prodRepository.GetProdutoById(id);
             if (prod == null) return NotFound("Produto não encontrado");
 
             ReadProdutoDto readDto = _mapper.Map<ReadProdutoDto>(prod);
@@ -49,23 +50,20 @@ namespace RestauranteNascimento.Controllers
             if (creatProdDto.Nome.Length < 3) throw new ArgumentException("o nome deve ter mais do que 3 caracteres");
             
             if(creatProdDto.Preco <= 0) throw new ArgumentException("o Preço tem que ser maior que zero");
-
+            
             if(creatProdDto.CategoriaId <= 0) throw new ArgumentException("CategoriaId tem que ser maior que zero");
 
-            Categoria categoria = _context.Categorias.Find(creatProdDto.CategoriaId);
-            if (categoria == null) throw new ArgumentException("não é possivel cadastrar o produto, CategoriaId não existe");
 
             Produto produto = _mapper.Map<Produto>(creatProdDto);
-            _context.Produtos.Add(produto);
-            _context.SaveChanges();
+            _prodRepository.PostProduto(produto);
             ReadProdutoDto readDto = _mapper.Map<ReadProdutoDto>(produto);
             return Ok(readDto);
         }
 
-        [HttpPut("{id:int}")]
-        public ActionResult<ProdutoDto> AtualizaProduto(int id, [FromBody] ProdutoDto prodDto)
+        [HttpPut]
+        public ActionResult<ProdutoDto> AtualizaProduto( [FromBody] ProdutoDto prodDto)
         {
-            if (id < 1) throw new ArgumentException("Id tem que ser maior do que zero");
+            if (prodDto.Id < 1) throw new ArgumentException("Id tem que ser maior do que zero");
 
             if (prodDto.Nome.Length < 3) throw new ArgumentException("o nome deve ter mais do que 3 caracteres");
 
@@ -73,15 +71,13 @@ namespace RestauranteNascimento.Controllers
 
             if (prodDto.CategoriaId <= 0) throw new ArgumentException("CategoriaId tem que ser maior que zero");
 
-            Categoria categoria = _context.Categorias.Find(prodDto.CategoriaId);
-            if (categoria == null) throw new ArgumentException("não é possivel alterar o produto, CategoriaId não existe");
+            Produto produto = _mapper.Map<Produto>(prodDto);
 
-            Produto produto = _context.Produtos.Find(id);
-            produto = _mapper.Map<Produto>(prodDto);
-            _context.Produtos.Update(produto);
-            _context.SaveChanges();
+            _prodRepository.UpdateProduto(produto);
             prodDto = _mapper.Map<ProdutoDto>(produto);
             return Ok(prodDto);
+
+
 
         }
 
@@ -90,11 +86,10 @@ namespace RestauranteNascimento.Controllers
         {
             if (id < 1) throw new ArgumentException("Id tem que ser maior do que zero");
 
-            var produto = _context.Produtos.Find(id);
+            var produto = _prodRepository.GetProdutoById(id);
             if (produto == null) return NotFound("Produto não encontrado");
 
-            _context.Produtos.Remove(produto);
-            _context.SaveChanges();
+            _prodRepository.DeleteProduto(produto);
             return NoContent();
         }
 
